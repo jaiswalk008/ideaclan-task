@@ -10,7 +10,7 @@ import { useLazyQuery , gql , useMutation } from "@apollo/client";
 const GET_MESSAGES = gql`
 query GetMessages($roomUuid: String!) {
     getMessages(roomUUID: $roomUuid) {
-      id
+      _id
       content
       username
     }
@@ -19,7 +19,7 @@ query GetMessages($roomUuid: String!) {
 const SEND_MESSAGE = gql`
 mutation SendMessage($content: String!, $username: String!, $roomUUID: String) {
     sendMessage(content: $content, username: $username, roomUUID: $roomUUID) {
-      id
+      _id
       content
       username
       roomUUID
@@ -42,9 +42,9 @@ const Chat = (props) => {
 
             if(data){
                 console.log(data)
-                const updatedMessagesList = [...messages , {...data.sendMessage}];
+                // const updatedMessagesList = [...messages , {...data.sendMessage}];
                 // console.log(updatedMessagesList);
-                setMessages(updatedMessagesList);
+                // setMessages(updatedMessagesList);
                 socket.emit('send-message',{...data.sendMessage})
             }
 
@@ -66,7 +66,6 @@ const Chat = (props) => {
     useEffect(()=>{
         const fetchMessages = async () =>{
            getMessages({variables:{roomUuid: roomuuid}})
-        //    console.log(Messages);
            if(Messages) setMessages(Messages.getMessages);
         }
         fetchMessages();

@@ -17,7 +17,7 @@ const ChatContainer = (props) =>{
             {props.messages.map((element)=>{
                const user = username===element.username ? 'you' : element.username;
                 return (
-                    <div key={element.id}><p className={username===element.username ?'self':'other' }
+                    <div key={element._id}><p className={username===element.username ?'self':'other' }
                     >{user}: {element.content}</p></div>
                 )
             })}

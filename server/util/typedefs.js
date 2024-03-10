@@ -2,7 +2,7 @@
 
 const typeDefs = `
     type Message {
-        id: ID!
+        _id: String!
         content: String!
         username: String!
         roomUUID: String
