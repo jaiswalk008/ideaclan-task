@@ -2,6 +2,11 @@ const Message = require('../Models/message');
 const Room = require('../Models/room');
 const { v4: uuidv4 } = require('uuid');
 const {redisClient} = require('./redis');
+
+const consumeMessages = require('./consumer');
+const setupChannel = require('./publisher');
+
+
 const resolvers = {
   Query: {
     getMessages: async (_, { roomUUID }) => {
@@ -9,7 +14,7 @@ const resolvers = {
         const messageCache = await redisClient.hget(roomUUID,'messages');
         if(messageCache){
           const parsedMessage = JSON.parse(messageCache);
-          console.log(parsedMessage);
+          // console.log(parsedMessage);
           return parsedMessage;
         }
        else{
@@ -27,7 +32,7 @@ const resolvers = {
       console.log(roomId);
       try {
         const room = await Room.findOne({ roomId });
-        console.log(room);
+        // console.log(room);
         if (room) {
           return { roomUUID: room.roomUUID };
         } else {
@@ -35,7 +40,8 @@ const resolvers = {
         }
       } catch (error) {
         console.error(error);
-        throw error;
+        return { error: error.message || "An error occurred" };
+
       }
     },
   },
@@ -47,18 +53,13 @@ const resolvers = {
           username,
           roomUUID,
         });
-        const messages =await redisClient.hget(roomUUID, 'messages');
-        if(messages){
-          const parsedMessages = JSON.parse(messages);
-          parsedMessages.push(newMessage);
-          await redisClient.hset(roomUUID, 'messages', JSON.stringify(parsedMessages));
-
+        const {channel , queue} = await setupChannel();
+        channel.sendToQueue(queue, Buffer.from(JSON.stringify(newMessage)), { persistent: true });
         
-        }
-        // Save the new message to the database
-        const savedMessage = await newMessage.save();
+        consumeMessages(channel, roomUUID);
+     
 
-        return savedMessage;
+        return newMessage;
       } catch (error) {
         console.error(error);
         throw error;
@@ -76,5 +77,7 @@ const resolvers = {
     },
   },
 };
+
+
 
 module.exports = resolvers;

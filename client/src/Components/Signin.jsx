@@ -28,7 +28,7 @@ const Signin = () => {
   const roomRef = useRef(null);
   const [showCreateButton, setShowCreateButton] = useState(false);
   const navigate = useNavigate();
-
+  const [errorMessage , setErrorMessage] = useState('');
   const [createRoom] = useMutation(CREATE_ROOM);
   const [joinRoom, { loading, error, data: joinRoomData }] = useLazyQuery(JOIN_ROOM);
   const handleSubmit = async (e) => {
@@ -45,12 +45,11 @@ const Signin = () => {
       } else {
         joinRoom({ variables: { roomId } });
         // console.log(joinRoomDataa)
-       
-      
       }
       localStorage.setItem('username', username);
     } catch (error) {
       console.error(error);
+      setErrorMessage(error?.message);
     }
   };
   useEffect(() =>{
@@ -58,11 +57,13 @@ const Signin = () => {
       console.log(joinRoomData);
       navigate(`/${joinRoomData.joinRoom.roomUUID}`);
     }
-  },[joinRoomData])
+    
+  },[joinRoomData ,error])
   const showCreateButtonToggler = () => setShowCreateButton(!showCreateButton);
 
   return (
     <div className="container sigin">
+      {error && <p className="error">Room not found</p>}
       <form onSubmit={handleSubmit}>
         <label className="form-label" htmlFor="username">UserName</label>
         <input type="text" className="form-control" id="username" name="username" ref={usernameRef} />

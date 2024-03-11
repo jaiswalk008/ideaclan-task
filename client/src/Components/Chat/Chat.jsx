@@ -1,5 +1,5 @@
 
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Footer from "./Footer";
 import ChatContainer from "./ChatContainer";
 import './Chat.css'
@@ -26,8 +26,8 @@ mutation SendMessage($content: String!, $username: String!, $roomUUID: String) {
     }
   }  
 `;
-const Chat = (props) => {
-   const username = localStorage.getItem('username');
+const Chat = () => {
+   const username = localStorage.getItem('username') || 'unknown';
     const [messages , setMessages] = useState([]);
    const {roomuuid} = useParams();
     const socket = useSocket();
@@ -42,9 +42,6 @@ const Chat = (props) => {
 
             if(data){
                 console.log(data)
-                // const updatedMessagesList = [...messages , {...data.sendMessage}];
-                // console.log(updatedMessagesList);
-                // setMessages(updatedMessagesList);
                 socket.emit('send-message',{...data.sendMessage})
             }
 
@@ -64,6 +61,9 @@ const Chat = (props) => {
     
     }),[roomuuid, messages])
     useEffect(()=>{
+        if(!username){
+            window.alert()
+        }
         const fetchMessages = async () =>{
            getMessages({variables:{roomUuid: roomuuid}})
            if(Messages) setMessages(Messages.getMessages);

@@ -50,3 +50,10 @@
 &::-webkit-scrollbar-track {
     background-color: #f0f0f0;
 }
+.error{
+    color: white;
+    background-color: rgb(233, 164, 45);
+    border: 1px solid red;
+    padding: 5px;
+    border-radius: 5px;
+}

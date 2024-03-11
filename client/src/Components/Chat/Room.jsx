@@ -5,12 +5,13 @@ import { useParams } from "react-router-dom";
 
 const Room = (props)=>{
     const params = useParams();
-    console.log(params)
+    
     return (
         <>
             <div className="container d-flex justify-content-center flex-column">
               
-                <h1>{params.roomuuid}</h1>
+                <h1 class="text-center">Welcome to chat room</h1>
+                <hr/>
                <Chat/>
             </div>
         </>

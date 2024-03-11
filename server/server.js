@@ -7,20 +7,24 @@ const http = require('http');
 const { Server } = require('socket.io');
 const {ApolloServer} = require('@apollo/server');
 const { expressMiddleware } = require('@apollo/server/express4');
-const server = express();
+const { fork } = require('child_process');
 const { default: mongoose } = require('mongoose');
-const {redisClient , redisPublisher ,redisSubscriber} = require('./util/redis');    
+const { redisPublisher ,redisSubscriber} = require('./util/redis');    
+
+const server = express();
+
 const app = http.createServer(server);
 const io = new Server(app , {
     cors:{
-        origin:'*',
+        origin:'http://localhost:3000',
     }
 });
 
-
+// Spawn a new process with consumer.js to run it on a separate thread
+fork('./util/consumer');
 server.use(cors({
-    // origin:"http://127.0.0.1:5500",
-    // methods:["GET","POST","DELETE"]
+    origin:'http://localhost:3000',
+    
 }));
 server.use(bodyParser.json());
 
@@ -37,7 +41,6 @@ io.on('connection',(socket) =>{
         console.log(obj);
         const {roomUUID} = obj;
         await  redisPublisher.publish(roomUUID , JSON.stringify(obj))
-        // socket.to(roomUUID).emit('receive-message',obj);
     })
    
 
@@ -52,7 +55,7 @@ redisSubscriber.on('message', (channel, message) => {
     const parsedMessage = JSON.parse(message);
     io.to(channel).emit('receive-message', parsedMessage);
     console.log(parsedMessage);
-  });
+});
   
 async function startServer(){
     try{
