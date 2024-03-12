@@ -6,8 +6,9 @@ import App from './App';
 import Signin from './Components/Signin';
 
 import { ApolloProvider, ApolloClient, InMemoryCache } from '@apollo/client';
+
 const client = new ApolloClient({
-  uri: 'http://localhost:5000/graphql', 
+  uri: process.env.REACT_APP_GRAPHQL_URI, 
   cache: new InMemoryCache(),
 });
 
@@ -19,7 +20,7 @@ root.render(
    
       <Router>
         <Routes>
-          <Route path="/:roomuuid" element={<App />} />
+          <Route path="/:roomUUID" element={<App />} />
           <Route path="/" element={<Signin />} />
         </Routes>
       </Router>

@@ -8,8 +8,8 @@ import { useParams } from "react-router-dom";
 import { useLazyQuery , gql , useMutation } from "@apollo/client";
 
 const GET_MESSAGES = gql`
-query GetMessages($roomUuid: String!) {
-    getMessages(roomUUID: $roomUuid) {
+query GetMessages($roomUUID: String!) {
+    getMessages(roomUUID: $roomUUID) {
       _id
       content
       username
@@ -29,19 +29,19 @@ mutation SendMessage($content: String!, $username: String!, $roomUUID: String) {
 const Chat = () => {
    const username = localStorage.getItem('username') || 'unknown';
     const [messages , setMessages] = useState([]);
-   const {roomuuid} = useParams();
+   const {roomUUID} = useParams();
     const socket = useSocket();
-    const [getMessages , {loading1 , error1 , data:Messages}] = useLazyQuery(GET_MESSAGES);
-    // const [sendMessage, { loading2, error2, data: Message }] = useMutation();
+
+    const [getMessages , {data:messageData}] = useLazyQuery(GET_MESSAGES);
+
     const [sendMessage] = useMutation(SEND_MESSAGE);
+
     const sendMessageHandler = useCallback(async (message)=>{
-        const messageDetails = {message,roomuuid,username}
-        // console.log(messageDetails);
         try{
-            const {data}  = await sendMessage({variables:{content: message, username, roomUUID: roomuuid}})
+            const {data}  = await sendMessage({variables:{content: message, username, roomUUID}})
 
             if(data){
-                console.log(data)
+                // console.log(data)
                 socket.emit('send-message',{...data.sendMessage})
             }
 
@@ -49,27 +49,24 @@ const Chat = () => {
         catch(err){
             console.log(err);
         }
-    },[messages])
-
+    },[roomUUID , sendMessage, socket,username])
     const displayReceivedMessage = useCallback(((message)=>{
-        if(message.roomUUID===roomuuid){
+        if(message.roomUUID===roomUUID){
             const updatedMessagesList = [...messages , {...message}];
             // console.log(updatedMessagesList);
             setMessages(updatedMessagesList);
             // console.log(message)
         }
     
-    }),[roomuuid, messages])
+    }),[roomUUID, messages])
     useEffect(()=>{
-        if(!username){
-            window.alert()
-        }
+       
         const fetchMessages = async () =>{
-           getMessages({variables:{roomUuid: roomuuid}})
-           if(Messages) setMessages(Messages.getMessages);
+           getMessages({variables:{roomUUID}})
+           if(messageData) setMessages(messageData.getMessages);
         }
         fetchMessages();
-    },[Messages])
+    },[messageData,getMessages , roomUUID])
 
     useEffect(() =>{
         socket.on('connect',() =>{
@@ -84,11 +81,11 @@ const Chat = () => {
     },[socket,messages,displayReceivedMessage])
 
     useEffect(() =>{
-        socket.emit('join-room',roomuuid);
+        socket.emit('join-room',roomUUID);
         return ()=>{
             socket.off('join-room', ()=> console.log('joined'));
         }
-    },[socket])
+    },[socket,roomUUID])
 
     return (
         <div className="container chat conversation w-75">

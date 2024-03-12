@@ -19,7 +19,7 @@ const resolvers = {
         }
        else{
         const messages = await Message.find({ roomUUID });
-        console.log(messages);
+        //console.log(messages);
         await redisClient.hset(roomUUID , 'messages',JSON.stringify(messages))
         return messages;
        }
@@ -29,7 +29,7 @@ const resolvers = {
       }
     },
     joinRoom: async (_, { roomId }) => {
-      console.log(roomId);
+      //console.log(roomId);
       try {
         const room = await Room.findOne({ roomId });
         // console.log(room);

@@ -1,9 +1,9 @@
-import { useEffect , useRef , useContext } from "react";
+import { useEffect , useRef } from "react";
 
 const ChatContainer = (props) =>{
     const chatContainerRef = useRef(null);
     const username = localStorage.getItem('username');
-    // const ctx = useContext(Context);
+    
   useEffect(() => {
 
     if (chatContainerRef.current) {

@@ -1,5 +1,5 @@
 // import * as e from 'express';
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { gql } from '@apollo/client';
 import { useNavigate } from "react-router-dom";
@@ -28,14 +28,14 @@ const Signin = () => {
   const roomRef = useRef(null);
   const [showCreateButton, setShowCreateButton] = useState(false);
   const navigate = useNavigate();
-  const [errorMessage , setErrorMessage] = useState('');
+  
   const [createRoom] = useMutation(CREATE_ROOM);
   const [joinRoom, { loading, error, data: joinRoomData }] = useLazyQuery(JOIN_ROOM);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const username = usernameRef.current?.value;
     const roomId = roomRef.current?.value;
-    console.log(roomId)
+ 
 
     try {
       if (showCreateButton) {
@@ -49,16 +49,15 @@ const Signin = () => {
       localStorage.setItem('username', username);
     } catch (error) {
       console.error(error);
-      setErrorMessage(error?.message);
     }
   };
   useEffect(() =>{
     if (joinRoomData) {
-      console.log(joinRoomData);
+      // console.log(joinRoomData);
       navigate(`/${joinRoomData.joinRoom.roomUUID}`);
     }
     
-  },[joinRoomData ,error])
+  },[joinRoomData ,navigate])
   const showCreateButtonToggler = () => setShowCreateButton(!showCreateButton);
 
   return (

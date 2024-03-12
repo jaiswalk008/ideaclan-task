@@ -20,8 +20,9 @@ const io = new Server(app , {
     }
 });
 
-// Spawn a new process with consumer.js to run it on a separate thread
+// fork a new process for consumer.js to run it on a separate thread
 fork('./util/consumer');
+
 server.use(cors({
     origin:'http://localhost:3000',
     
@@ -30,31 +31,26 @@ server.use(bodyParser.json());
 
   
 io.on('connection',(socket) =>{
-    console.log('connected:'+socket.id);
+    //console.log('connected:'+socket.id);
     socket.on('join-room' ,async  (roomuuid) =>{
-        console.log('joined roomuuid' , roomuuid);
+        // console.log('joined roomuuid' , roomuuid);
         socket.join(roomuuid);
         await redisSubscriber.subscribe(roomuuid);
     })
     
-    socket.on('send-message',async (obj) => {
-        console.log(obj);
-        const {roomUUID} = obj;
-        await  redisPublisher.publish(roomUUID , JSON.stringify(obj))
+    socket.on('send-message',async (messageObj) => {
+        // console.log(messageObj);
+        const {roomUUID} = messageObj;
+        //publishing message
+        await  redisPublisher.publish(roomUUID , JSON.stringify(messageObj))
     })
-   
 
-    socket.on('leave-room', (roomUUID) => {
-        console.log('left group ',roomUUID)
-        socket.leave(roomUUID);
-    })
-    
 })
-
+//consuming messages
 redisSubscriber.on('message', (channel, message) => {
     const parsedMessage = JSON.parse(message);
     io.to(channel).emit('receive-message', parsedMessage);
-    console.log(parsedMessage);
+    //console.log(parsedMessage);
 });
   
 async function startServer(){
